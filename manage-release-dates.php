@@ -2,7 +2,7 @@
 /** Plugin Name: Manage Upcoming Release
 * Author: Olaf Parusel
 * Description: Manage upcoming releases for your Site with Custom Post Type and display them easily via Shortcode.
-* Version: 1.0.0
+* Version: 1.1.1
 */
 // Register Custom Post Type Release
 add_action( 'init', 'mur_custom_post_type_release' );
@@ -37,7 +37,7 @@ function mur_custom_post_type_release() {
 		"rewrite" => array( "slug" => "release", "with_front" => true ),
 		"query_var" => true,
 		"menu_icon" => "dashicons-format-aside",		
-		"supports" => array( "title", "thumbnail", "editor" ),			
+		"supports" => array( "title", "thumbnail", "editor", "comments" ),			
 		);
 	register_post_type( "Release", $args );
 }
@@ -70,21 +70,76 @@ $release_date = get_post_meta( get_the_ID(), 'release_date_field', true );
 		), $atts )
 	);
 
+	// WP_Query arguments
+	$args1 = array(
+		'post_type' 		=> 'release', 
+		'posts_per_page' 	=> $posts, 
+		'order' 			=> 'ASC', 
+		'orderby' 			=> 'meta_value_num', 
+		'meta_key' 			=> 'release_date_field', 
+		'meta_query' 		=> 	array( 
+									array( 
+										'key' 	=> 'release_date_field', 
+										'value' => $today, 
+										'compare' => '>=', 
+										'type' => 'DATE',
+									)
+								),
+	);
+
+	$args2 = array(
+		'post_type' 		=> 'release', 
+		'order' 			=> 'ASC', 
+		'orderby' 			=> 'meta_value_num', 
+		'meta_key' 			=> 'unknown_release_tba_to_be_announced_', 
+		'meta_query'		=> 	array(
+									array(
+										'key' => 'unknown_release_tba_to_be_announced_',
+										'value'   => null,
+						                'compare' => '!='
+									)
+								)
+		);
+
 	// Code
 	$output .= '<div class="mur-wrapper">';
 	$output .= '<table class="table table-striped">';
 	
-		$the_query = new WP_Query( array( 'post_type' => 'release', 'posts_per_page' => $posts, 'order' => 'ASC', 'orderby' => 'meta_value_num', 'meta_key' => 'release_date_field', 'meta_query' => array( array( 'key' => 'release_date_field', 'value' => $today, 'compare' => '>=', 'type' => 'DATE',)), ));
+		$the_query = new WP_Query( $args1 );
 		while ( $the_query->have_posts() ):
 			$the_query->the_post();
 				$output .= '<tr>';
 				$output .= 		'<td>';
 				$output .= 			'<h4 class="mur-heading"><a href="' . get_the_permalink() .'">' . get_the_title() . '</a></h4>';
 				$output .= 		'</td>';
+				if (get_post_meta( $post->ID, 'release_date_field', true )) {
+					$output .= 		'<td>';
+										$date = DateTime::createFromFormat('Ymd', get_post_meta( $post->ID, 'release_date_field', true ) );
+					$output .= 			$date->format('d. F \'y');	
+					$output .= 		'</td>';
+				}
+			if ($thumb == '1') {
 				$output .= 		'<td>';
-									$date = DateTime::createFromFormat('Ymd', get_post_meta( $post->ID, 'release_date_field', true ) );
-				$output .= 			$date->format('d. F \'y');	
+				$output .=			get_the_post_thumbnail(get_the_ID(), array($thumb_width, $thumb_height), array( 'class' => 'center-block') );
 				$output .= 		'</td>';
+			}
+			else {
+				}
+				$output .= '</tr>';
+		endwhile;
+
+		$the_query2 = new WP_Query( $args2 );
+		while ( $the_query2->have_posts() ):
+			$the_query2->the_post();
+				$output .= '<tr>';
+				$output .= 		'<td>';
+				$output .= 			'<h4 class="mur-heading"><a href="' . get_the_permalink() .'">' . get_the_title() . '</a></h4>';
+				$output .= 		'</td>';
+				if (get_post_meta( $post->ID, 'unknown_release_tba_to_be_announced_', true )) {
+					$output .= 		'<td>';
+					$output .= 			'Unknown';
+					$output .= 		'</td>';
+				}
 			if ($thumb == '1') {
 				$output .= 		'<td>';
 				$output .=			get_the_post_thumbnail(get_the_ID(), array($thumb_width, $thumb_height), array( 'class' => 'center-block') );
@@ -95,7 +150,7 @@ $release_date = get_post_meta( get_the_ID(), 'release_date_field', true );
 				$output .= '</tr>';
 		endwhile;
 		wp_reset_postdata();
-	
+
 	$output .= '</table>';
 	$output .= '</div>';
 	
@@ -115,10 +170,17 @@ function mur_template_cpt($content)
 		$content .= 		'<td>';
 		$content .= 			'<h4 class="mur-heading">' . get_the_title() . '</h4>';
 		$content .= 		'</td>';
-		$content .= 		'<td>';
-							$date = DateTime::createFromFormat('Ymd', get_post_meta( $post->ID, 'release_date_field', true ) );
-		$content .= 		$date->format('d. F \'y');
-		$content .= 		'</td>';
+		if (get_post_meta( $post->ID, 'release_date_field', true )) {
+			$content .= 		'<td>';
+						$date = DateTime::createFromFormat('Ymd', get_post_meta( $post->ID, 'release_date_field', true ) );
+			$content .= 		$date->format('d. F \'y');
+			$content .= 		'</td>';
+		}
+		else {
+			$content .= 		'<td>';
+			$content .= 		'Unknown';
+			$content .= 		'</td>';
+		}
 		$content .= 		'<td>';
 		$content .=			get_the_post_thumbnail(get_the_ID(), 'thumbnail', array( 'class' => 'center-block') );
 		$content .= 		'</td>';
@@ -143,4 +205,5 @@ function mur_quicktag() {
 	}
 }
 add_action( 'admin_print_footer_scripts', 'mur_quicktag' );
+require_once('metabox-tba.php');
 ?>
