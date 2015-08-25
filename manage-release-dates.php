@@ -2,7 +2,7 @@
 /** Plugin Name: Manage Upcoming Release
 * Author: Olaf Parusel
 * Description: Manage upcoming releases for your Site with Custom Post Type and display them easily via Shortcode.
-* Version: 1.1.0
+* Version: 1.1.1
 */
 // Register Custom Post Type Release
 add_action( 'init', 'mur_custom_post_type_release' );
