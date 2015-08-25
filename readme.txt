@@ -1,9 +1,9 @@
-=== Plugin Name ===
+=== Manage Upcoming Release ===
 Contributors: jabbadu
 Tags: custom post type, release, shortcode 
 Requires at least: 3.5
-Tested up to: 4.2
-Stable tag: 1.0.0
+Tested up to: 4.3
+Stable tag: 1.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,7 @@ http://mur.jabbadu.com/
 Features:
 
 * Add, edit and delete releases
+* TBA posibilty for unknown releases
 * Display releases via **Shortcode**
 * Releases in the past will not be displayed
 * Use them for: movies, games, music or other upcoming releases
@@ -40,6 +41,10 @@ Features:
 Just insert the Shortcode on a Text-Widget.
 
 == Changelog ==
+
+= 1.1.0 =
+* Add Comments to release post type
+* Add TBA Meta-Box
 
 = 1.0.0 =
 * Initial version
